@@ -1,0 +1,16 @@
+/* global.css 或 app.css */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Webkit */
+}
+
+div[data-radix-popper-content-wrapper] {
+  
+  /* transform: none !important; */
+  
+
+  /* position: absolute !important; */
+}

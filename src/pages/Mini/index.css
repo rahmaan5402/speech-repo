@@ -1,0 +1,21 @@
+:where([class^="ri-"])::before {
+    content: "\f3c2";
+}
+
+.dragging {
+    user-select: none;
+    cursor: grabbing !important;
+}
+
+.drag-button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drag-button.dragging {
+    transition: none;
+    z-index: 9999;
+}
+
+.drag-button.returning {
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
