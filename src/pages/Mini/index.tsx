@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
-import logo from "@/assets/speech.png";
+import { toggleSidebar } from '@/lib/utils';
 
 function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
     const [position, setPosition] = useState({
@@ -53,6 +53,8 @@ function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
         setIsOpen(!isOpen);
         // open sidebar
         miniChangeOpen(false);
+        // resize layout
+        toggleSidebar(true);
     };
     const handleMouseMove = (e: any) => {
         if (!isDragging) return;
@@ -149,7 +151,7 @@ function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
                 onClick={handleClick}
             >
                 <div className="w-8 h-8 flex items-center justify-center">
-                    <img src={logo} />
+                    <img src={"./speech.png"} />
                 </div>
             </div>
         </div>

@@ -1,11 +1,17 @@
+import { HashRouter, useRoutes } from 'react-router-dom'
+import router from './router';
 import './App.css'
-import { RouterProvider } from 'react-router-dom'
-import router from './router'
+import 'sonner/dist/styles.css';
+
+function AppRoutes() {
+  return useRoutes(router);
+}
 
 function App() {
   return (
-    <RouterProvider router={router} />
-  )
+    <HashRouter>
+      <AppRoutes />
+    </HashRouter>
+  );
 }
-
 export default App

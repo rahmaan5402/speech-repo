@@ -71,3 +71,15 @@ interface MiniProps {
 }
 
 interface HeaderProps extends MiniProps {}
+
+interface SpeechExtensionReadyEvent extends CustomEvent {
+  detail: {
+    shadowRoot: ShadowRoot;
+  };
+}
+
+declare global {
+  interface Window {
+    __speechExtensionShadowRoot?: ShadowRoot;
+  }
+}

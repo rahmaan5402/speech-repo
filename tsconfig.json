@@ -17,7 +17,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
@@ -30,7 +30,7 @@
   },
   "include": [
     "src"
-  ],
+, "src/lib/background.ts"  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

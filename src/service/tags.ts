@@ -1,18 +1,18 @@
-import { db } from './db';
+import { sendMessageToBackground } from "@/lib/utils";
 
 export async function getAllTags(): Promise<Tag[]> {
-  return await db.tags.toArray();
+  return await sendMessageToBackground('getAllTags');
 }
 
 export async function addTag(tagName: string): Promise<number | null> {
-  // 确保名称唯一
-  const exists = await db.tags.where('name').equals(tagName).first();
-  if (exists) {
-    return null; // 已存在，返回 null 表示失败
+  try {
+    return await sendMessageToBackground('addTag', tagName);
+  } catch (error) {
+    console.error('添加标签失败:', error);
+    return null;
   }
-  return await db.tags.add({ name: tagName });
 }
 
 export async function deleteTagById(id: number): Promise<void> {
-  await db.tags.delete(id);
+  await sendMessageToBackground('deleteTagById', id);
 }

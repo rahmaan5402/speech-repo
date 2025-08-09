@@ -14,4 +14,22 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      // 👇 多入口打包
+      input: {
+        main: path.resolve(__dirname, 'index.html'),  // 主页面入口（确保存在 index.html）
+        background: path.resolve(__dirname, 'src/lib/background.ts'), // 额外入口
+      },
+      output: {
+        entryFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'background') {
+            return 'background.js'
+          }
+          return 'assets/main.js'
+        },
+        assetFileNames: 'assets/style.css',
+      }
+    }
+  }
 })

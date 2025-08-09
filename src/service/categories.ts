@@ -1,23 +1,18 @@
-import { db } from './db';
+import { sendMessageToBackground } from "@/lib/utils";
 
 export async function getAllCategories(): Promise<Category[]> {
-  return await db.categories.orderBy('sorted').toArray();
+  return await sendMessageToBackground('getAllCategories');
 }
 
 export async function addCategory(name: string): Promise<number | null> {
-  // 名称是否已存在（忽略大小写）
-  const exists = await db.categories.where('name').equalsIgnoreCase(name).first();
-  if (exists) {
+  try {
+    return await sendMessageToBackground('addCategory', { name });
+  } catch (error) {
+    console.error('添加分类失败:', error);
     return null;
   }
-
-  // 查询当前最大的 sort 值
-  const last = await db.categories.orderBy('sorted').last();
-  const nextSort = last ? last.sorted + 1 : 1;
-
-  return await db.categories.add({ name, sorted: nextSort });
 }
 
 export async function deleteCategoryByName(name: string): Promise<void> {
-  await db.categories.where('name').equals(name).delete();
+  await sendMessageToBackground('deleteCategoryByName', { name });
 }

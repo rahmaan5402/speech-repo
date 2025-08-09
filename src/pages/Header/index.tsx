@@ -1,5 +1,6 @@
 import SingleInputDialog from '@/components/common/SingleInputDialog';
 import { DropdownMenuContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { toggleSidebar } from '@/lib/utils';
 import { useCategoryStore } from '@/store/categories';
 import { useTagStore } from '@/store/tags';
 import { Plus, X } from 'lucide-react';
@@ -18,8 +19,9 @@ function Header({ miniChangeOpen, setSide, side }: HeaderProps) {
     const handleSidebarClose = () => {
         miniChangeOpen(true);
         setSide(side);
+        toggleSidebar(false);
     }
-
+    
     return (
         <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-5 shadow-lg">
             {/* 浮动在右上角的 X 按钮 */}
@@ -27,7 +29,7 @@ function Header({ miniChangeOpen, setSide, side }: HeaderProps) {
                 <X size={12} />
             </div>
             <div className="flex justify-between items-center">
-                <h1 className="text-lg font-semibold">话术库</h1>
+                <p className="text-lg font-semibold">话术库</p>
                 <div className='flex gap-2.5 items-center'>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

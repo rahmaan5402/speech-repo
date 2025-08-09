@@ -22,6 +22,7 @@ export const useScriptStore = create<ScriptState>((set, get) => ({
             getScriptsByPage(category, page, size),
             getTotalScriptCount(category)
         ]);
+        console.log('loadScripts', list);
         set({ scripts: list, total: count });
     },
 

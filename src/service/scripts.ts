@@ -1,48 +1,36 @@
-import { db } from './db';
+import { sendMessageToBackground } from "@/lib/utils";
 
 // 分页查询脚本
 export async function getScriptsByPage(category: string, page: number, pageSize: number): Promise<Script[]> {
-    const offset = (page - 1) * pageSize;
-    if (category === 'all') {
-        return await db.scripts.offset(offset).limit(pageSize).toArray();
-    }
-    return await db.scripts
-        .where('category')
-        .equals(category)
-        .offset(offset)
-        .limit(pageSize)
-        .toArray();
+  return await sendMessageToBackground('getScriptsByPage', { category, page, pageSize });
 }
 
 // 查询总数量（分页用）
 export async function getTotalScriptCount(category: string): Promise<number> {
-    if (category === 'all') {
-        return await db.scripts.count();
-    }
-    return await db.scripts.where('category').equals(category).count();
+  return await sendMessageToBackground('getTotalScriptCount', category);
 }
 
 // 添加脚本
 export async function addScript(script: Omit<Script, 'id'>): Promise<number> {
-    return await db.scripts.add(script);
+  return await sendMessageToBackground('addScript', script);
 }
 
 // 删除脚本
 export async function deleteScriptById(id: number): Promise<void> {
-    await db.scripts.delete(id);
+  await sendMessageToBackground('deleteScriptById', id);
 }
 
 // 编辑脚本
 export async function updateScript(script: Script): Promise<void> {
-    await db.scripts.put(script);
+  await sendMessageToBackground('updateScript', script);
 }
 
 // 根据 ID 查询脚本
 export async function getScriptById(id: number): Promise<Script | undefined> {
-    return await db.scripts.get(id);
+  return await sendMessageToBackground('getScriptById', id);
 }
 
-// scripts.ts
+// 根据分类删除脚本
 export async function deleteScriptsByCategory(category: string): Promise<void> {
-  await db.scripts.where('category').equals(category).delete();
+  await sendMessageToBackground('deleteScriptsByCategory', category);
 }
