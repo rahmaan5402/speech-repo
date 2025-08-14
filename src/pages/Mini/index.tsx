@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
-import { toggleSidebar } from '@/lib/utils';
+import { getElByShadowRoot, toggleSidebar } from '@/lib/utils';
+
 
 function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
     const [position, setPosition] = useState({
@@ -10,6 +11,7 @@ function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [isReturning, setIsReturning] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [logo, setLogo] = useState('');
     const buttonRef = useRef<any>(null);
     const dragStartRef = useRef({ x: 0, y: 0 });
     const offsetRef = useRef({ x: 0, y: 0 });
@@ -81,6 +83,11 @@ function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
         }, 600);
     };
     useEffect(() => {
+        const el = getElByShadowRoot('speech-extension-logo');
+        if (el) {
+            setLogo(el.dataset.iconUrl);
+            console.log("speech-extension-logo =  ", el.dataset.iconUrl);
+        }
         if (isDragging) {
             document.addEventListener("mousemove", handleMouseMove);
             document.addEventListener("mouseup", handleMouseUp);
@@ -129,7 +136,7 @@ function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50">
             <div
                 ref={buttonRef}
                 className={`
@@ -151,7 +158,7 @@ function Mini({ miniChangeOpen, setSide, side }: MiniProps) {
                 onClick={handleClick}
             >
                 <div className="w-8 h-8 flex items-center justify-center">
-                    <img src={"./speech.png"} />
+                    <img src={logo} />
                 </div>
             </div>
         </div>

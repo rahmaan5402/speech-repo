@@ -11,27 +11,23 @@ import {
 import { useScriptStore } from '@/store/scripts';
 import { useNavigate } from 'react-router-dom';
 import { useCategoryStore } from '@/store/categories';
-import SingleInputDialog from '@/components/common/SingleInputDialog';
-import { useTagStore } from '@/store/tags';
 import { Separator } from '@/components/ui/separator';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { DEFAULT_ALL, pageSize } from '@/utils/constants';
-import { withToastFeedback } from '@/utils/withToastFeedback';
-
-
+import { useTranslation } from 'react-i18next';
+import { useToastFeedback } from '@/hooks/useToastFeedback';
 
 function List() {
+    const { t } = useTranslation();
+    const withToastFeedback = useToastFeedback();
     const [currentFilter, setCurrentFilter] = useState(DEFAULT_ALL);
     const [currentPageNum, setCurrentPageNum] = useState(1);
     const [copiedId, setCopiedId] = useState<number | null>(null);
-    const [openTagsDialog, setOpenTagsDialog] = useState(false);
-    const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
 
     const navigate = useNavigate();
 
     const { scripts, total, loadScripts, deleteScript, deleteCategory } = useScriptStore();
-    const { categories, loadCategories, addCategory } = useCategoryStore();
-    const { addTag } = useTagStore();
+    const { categories, loadCategories } = useCategoryStore();
 
     useEffect(() => {
         loadScripts(currentPageNum, pageSize, currentFilter);
@@ -79,7 +75,7 @@ function List() {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                 >
-                    全部
+                    {t('category.all')}
                 </button>
                 {categories.map(c => (
                     <button
@@ -94,13 +90,18 @@ function List() {
                     >
                         {c.name}
                         {
-                            currentFilter === c.name && <ConfirmDialog
-                                title="删除"
-                                description={`确定要删除该类型吗${total === 0 ? '？' : `，该类型下的 ${total} 条话术也会被删除？`}`}
+                            currentFilter === c.name
+                            && <ConfirmDialog
+                                title={t('category.delete')}
+                                description={t(total === 0 ? 'category.delete.confirm' : 'category.delete.confirm.withItems', {
+                                    count: total
+                                })}
                                 onConfirm={() => withToastFeedback(() => deleteCategory(c.name))}
                                 trigger={
                                     <X size={12} />
                                 }
+                                confirmText={t('dialog.confirm.title')}
+                                cancelText={t('dialog.cancel.title')}
                             />
                         }
                     </button>
@@ -139,26 +140,28 @@ function List() {
                                     className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-emerald-600 hover:bg-emerald-50 transition-all hover:scale-105"
                                 >
                                     {copiedId === script.id ? <Check size={12} /> : <Copy size={12} />}
-                                    {copiedId === script.id ? '已复制' : '复制'}
+                                    {copiedId === script.id ? t('action.copied') : t('action.copy')}
                                 </button>
                                 <button
                                     onClick={() => editScript(script.id!)}
                                     className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-amber-600 hover:bg-amber-50 transition-all hover:scale-105"
                                 >
                                     <Edit size={12} />
-                                    <span>编辑</span>
+                                    <span>{t('action.edit')}</span>
                                 </button>
 
                                 <ConfirmDialog
-                                    title="删除"
-                                    description="确定要删除这条话术吗？"
+                                    title={t('action.delete')}
+                                    description={t('action.delete.confirm')}
                                     onConfirm={() => handleDeleteScript(script.id!)}
                                     trigger={
                                         <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-red-600 hover:bg-red-50 transition-all hover:scale-105">
                                             <Trash2 size={12} />
-                                            <span>删除</span>
+                                            <span>{t('action.delete')}</span>
                                         </button>
                                     }
+                                    confirmText={t('dialog.confirm.title')}
+                                    cancelText={t('dialog.cancel.title')}
                                 />
                             </div>
                         </div>
@@ -167,8 +170,19 @@ function List() {
             </div>
 
             {/* Pagination */}
+            <Pagination 
+                totalPages={totalPages} 
+                currentPageNum={currentPageNum} 
+                goToPage={goToPage} />
+        </>
+    )
+}
+
+const Pagination = ({ totalPages, currentPageNum, goToPage }: { totalPages: number, currentPageNum: number, goToPage: (page: number) => void }) => {
+    return (
+        <>
             {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 p-5">
+                <div className="flex justify-center items-center gap-1.5 p-5">
                     <button
                         onClick={() => goToPage(currentPageNum - 1)}
                         disabled={currentPageNum === 1}
@@ -177,21 +191,105 @@ function List() {
                         <ChevronLeft size={16} />
                     </button>
 
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                        const page = i + 1;
-                        return (
-                            <button
-                                key={page}
-                                onClick={() => goToPage(page)}
-                                className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium transition-all ${currentPageNum === page
-                                    ? 'bg-[#7161F6] text-white'
-                                    : 'bg-white/50 hover:bg-indigo-100'
-                                    }`}
-                            >
-                                {page}
-                            </button>
-                        );
-                    })}
+                    {/* 生成页码和省略号 */}
+                    {(() => {
+                        const pages = [];
+                        // 总页数不超过5页，直接显示所有页码
+                        if (totalPages <= 5) {
+                            for (let i = 1; i <= totalPages; i++) {
+                                pages.push(
+                                    <button
+                                        key={i}
+                                        onClick={() => goToPage(i)}
+                                        className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium transition-all ${currentPageNum === i
+                                            ? 'bg-[#7161F6] text-white'
+                                            : 'bg-white/50 hover:bg-indigo-100'
+                                            }`}
+                                    >
+                                        {i}
+                                    </button>
+                                );
+                            }
+                        } else {
+                            // 总页数超过5页，最多显示5个页码
+                            // 显示第一页
+                            pages.push(
+                                <button
+                                    key={1}
+                                    onClick={() => goToPage(1)}
+                                    className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium transition-all ${currentPageNum === 1
+                                        ? 'bg-[#7161F6] text-white'
+                                        : 'bg-white/50 hover:bg-indigo-100'
+                                        }`}
+                                >
+                                    1
+                                </button>
+                            );
+
+                            // 如果当前页码大于2，添加第一个省略号
+                            if (currentPageNum > 2) {
+                                pages.push(
+                                    <span key="ellipsis1" className="w-4 h-4 flex items-center justify-center text-xs text-gray-500">...</span>
+                                );
+                            }
+
+                            // 确定要显示的中间页码范围
+                            let startPage, endPage;
+                            if (currentPageNum <= 2) {
+                                // 当前页码靠近前面，显示页码2,3,4
+                                startPage = 2;
+                                endPage = 4;
+                            } else if (currentPageNum >= totalPages - 1) {
+                                // 当前页码靠近后面，显示页码totalPages-3, totalPages-2, totalPages-1
+                                startPage = totalPages - 3;
+                                endPage = totalPages - 1;
+                            } else {
+                                // 当前页码在中间，显示前一页、当前页、后一页
+                                startPage = currentPageNum - 1;
+                                endPage = currentPageNum + 1;
+                            }
+
+                            // 显示中间页码
+                            for (let i = startPage; i <= endPage; i++) {
+                                if (i > 1 && i < totalPages) {
+                                    pages.push(
+                                        <button
+                                            key={i}
+                                            onClick={() => goToPage(i)}
+                                            className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium transition-all ${currentPageNum === i
+                                                ? 'bg-[#7161F6] text-white'
+                                                : 'bg-white/50 hover:bg-indigo-100'
+                                                }`}
+                                        >
+                                            {i}
+                                        </button>
+                                    );
+                                }
+                            }
+
+                            // 如果当前页码小于totalPages-1，添加第二个省略号
+                            if (currentPageNum < totalPages - 1) {
+                                pages.push(
+                                    <span key="ellipsis2" className="w-4 h-4 flex items-center justify-center text-xs text-gray-500">...</span>
+                                );
+                            }
+
+                            // 显示最后一页
+                            pages.push(
+                                <button
+                                    key={totalPages}
+                                    onClick={() => goToPage(totalPages)}
+                                    className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium transition-all ${currentPageNum === totalPages
+                                        ? 'bg-[#7161F6] text-white'
+                                        : 'bg-white/50 hover:bg-indigo-100'
+                                        }`}
+                                >
+                                    {totalPages}
+                                </button>
+                            );
+                        }
+                        return pages;
+                    })()}
 
                     <button
                         onClick={() => goToPage(currentPageNum + 1)}
@@ -202,24 +300,8 @@ function List() {
                     </button>
                 </div>
             )}
-
-            <SingleInputDialog
-                open={openTagsDialog}
-                onOpenChange={setOpenTagsDialog}
-                title="创建标签"
-                placeholder="请输入标签名称"
-                onSubmit={(value) => addTag(value)}
-            />
-
-            <SingleInputDialog
-                open={openCategoryDialog}
-                onOpenChange={setOpenCategoryDialog}
-                title="创建类型"
-                placeholder="请输入类型名称"
-                onSubmit={(value) => addCategory(value)}
-            />
         </>
-    )
+    );
 }
 
 export default List

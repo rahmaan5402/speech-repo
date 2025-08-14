@@ -19,6 +19,7 @@ export default defineConfig({
       // 👇 多入口打包
       input: {
         main: path.resolve(__dirname, 'index.html'),  // 主页面入口（确保存在 index.html）
+        content: path.resolve(__dirname, 'src/lib/content.js'), // 额外入口
         background: path.resolve(__dirname, 'src/lib/background.ts'), // 额外入口
       },
       output: {
@@ -26,9 +27,12 @@ export default defineConfig({
           if (chunkInfo.name === 'background') {
             return 'background.js'
           }
+          if (chunkInfo.name === 'content') {
+            return 'content.js'
+          }
           return 'assets/main.js'
         },
-        assetFileNames: 'assets/style.css',
+        assetFileNames: 'assets/style.css'
       }
     }
   }

@@ -12,10 +12,10 @@ import {
 
 export function ConfirmDialog({
   trigger,
-  title = "提示",
-  description = "确定要执行该操作吗？",
-  confirmText = "确定",
-  cancelText = "取消",
+  title,
+  description,
+  confirmText,
+  cancelText,
   onConfirm,
 }: ConfirmDialogProps) {
   return (

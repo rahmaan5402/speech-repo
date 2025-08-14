@@ -8,17 +8,20 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { withToastFeedback } from "@/utils/withToastFeedback"
+import { useToastFeedback } from "@/hooks/useToastFeedback"
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 export default function SingleInputDialog({
   open,
   onOpenChange,
   title,
-  placeholder = "请输入内容",
+  placeholder,
   defaultValue = "",
   onSubmit,
 }: SingleInputDialogProps) {
+  const { t } = useTranslation();
+  const withToastFeedback = useToastFeedback();
   const [value, setValue] = useState(defaultValue)
   const [loading, setLoading] = useState(false)
 
@@ -31,7 +34,7 @@ export default function SingleInputDialog({
 
   const handleSave = async () => {
     setLoading(true)
-    withToastFeedback(() => onSubmit(value))
+    await withToastFeedback(() => onSubmit(value))
     onOpenChange(false)
     setLoading(false)
   }
@@ -45,7 +48,7 @@ export default function SingleInputDialog({
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-gray-700 text-right">
-              名称
+              {t('dialog.common.name')}
             </Label>
             <Input
               id="name"
@@ -58,7 +61,7 @@ export default function SingleInputDialog({
         </div>
         <DialogFooter>
           <Button className="bg-[#7161F6] hover:bg-[#7161F6]" type="button" onClick={handleSave} disabled={loading}>
-            {loading ? "保存中..." : "保存"}
+            {loading ? t('dialog.common.action.saving') : t('dialog.common.action.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

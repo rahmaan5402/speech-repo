@@ -1,5 +1,6 @@
 // 检查是否在Chrome扩展环境中
 if (chrome?.runtime) {
+  // 监听 shadcn 的 select 组件往宿主页面插入 style 标签
   const observer = new MutationObserver(() => {
     document.querySelectorAll('style').forEach(styleEl => {
       if (styleEl.textContent?.includes('.with-scroll-bars-hidden')) {
@@ -27,10 +28,6 @@ if (chrome?.runtime) {
   shadowRoot.appendChild(modalHost);
 
   // 引入 CSS（可选）
-  // const style = document.createElement('link');
-  // style.rel = 'stylesheet';
-  // style.href = chrome.runtime.getURL('assets/style.css'); // 你需要替换成真实文件名
-  // shadowRoot.appendChild(style);
   fetch(chrome.runtime.getURL('assets/style.css'))
     .then((response) => response.text())
     .then((cssText) => {
@@ -44,6 +41,11 @@ if (chrome?.runtime) {
       // 插入到 shadow root 中
       shadowRoot.appendChild(styleEl);
     });
+
+  const el = document.createElement('div');
+  el.id = 'speech-extension-logo';
+  el.dataset.iconUrl = chrome.runtime.getURL('speech.png');
+  shadowRoot.appendChild(el);  
 
   // 注入 React 应用的 JS 脚本
   const script = document.createElement('script');

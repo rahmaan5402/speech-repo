@@ -7,8 +7,9 @@ import { useScriptStore } from '@/store/scripts';
 import { useEffect } from 'react';
 import { useTagStore } from '@/store/tags';
 import { useCategoryStore } from '@/store/categories';
-import { withToastFeedback } from '@/utils/withToastFeedback';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useToastFeedback } from '@/hooks/useToastFeedback';
 
 
 const initScript: Script = {
@@ -18,6 +19,8 @@ const initScript: Script = {
 }
 
 function Create() {
+    const { t } = useTranslation();
+    const withToastFeedback = useToastFeedback();
     const navigate = useNavigate();
     const { control, getValues, reset, trigger, formState: { errors } } = useForm({ defaultValues: initScript });
     const { addScript, getScriptById, updateScript } = useScriptStore();
@@ -63,7 +66,7 @@ function Create() {
             toast.warning(
                 typeof firstError?.message === "string"
                     ? firstError.message
-                    : "请填写完整信息",
+                    : t('form.speech.action.warning'),
                 {
                     action: {
                         label: "OK",
@@ -76,9 +79,9 @@ function Create() {
         }
         const { id, ...values } = getValues() as Script;
         if (id) {
-            withToastFeedback(() => updateScript({ ...values, id }));
+            await withToastFeedback(() => updateScript({ ...values, id }));
         } else {
-            withToastFeedback(() => addScript(values));
+            await withToastFeedback(() => addScript(values));
         }
         showHomePage(); // 返回首页
     }
@@ -91,16 +94,16 @@ function Create() {
                     <Controller
                         name="content"
                         control={control}
-                        rules={{ required: "话术内容不能为空" }}
+                        rules={{ required: t('form.speech.content.required') }}
                         render={({ field }) => (
                             <>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    话术内容
+                                    {t('form.speech.content')}
                                 </label>
                                 <Textarea
                                     {...field}
                                     className="resize-none min-h-[120px]"
-                                    placeholder="请输入话术内容..." />
+                                    placeholder={t('form.speech.content.placeholder')} />
                             </>
                         )}
                     />
@@ -108,15 +111,15 @@ function Create() {
                     <Controller
                         name="category"
                         control={control}
-                        rules={{ required: "类型不能为空" }}
+                        rules={{ required: t('form.speech.category.required') }}
                         render={({ field }) => (
                             <>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    类型
+                                    {t('form.speech.category')}
                                 </label>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <SelectTrigger className="w-[100%]">
-                                        <SelectValue placeholder="请选择类型" />
+                                        <SelectValue placeholder={t('form.speech.category.placeholder')} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
@@ -138,13 +141,13 @@ function Create() {
                         render={({ field }) => (
                             <>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    标签
+                                    {t('form.speech.tag')}
                                 </label>
                                 <MultiSelect
                                     options={options}
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
-                                    placeholder="请选择标签"
+                                    placeholder={t('form.speech.tag.placeholder')}
                                     variant="inverted"
                                     maxCount={3}
                                 />
@@ -159,14 +162,14 @@ function Create() {
                             onClick={showHomePage}
                             className="flex-1 bg-gray-100 text-gray-700 py-3 rounded text-sm font-medium transition-all hover:bg-gray-200"
                         >
-                            返回
+                            {t('form.speech.action.cancel')}
                         </button>
                         <button
                             type="button"
                             onClick={saveScript}
                             className="flex-1 bg-[#7161F6] text-white py-3 rounded text-sm font-medium transition-all hover:-translate-y-0.5 hover:shadow-lg"
                         >
-                            保存话术
+                            {t('form.speech.action.save')}
                         </button>
                     </div>
                 </div>
