@@ -6,18 +6,31 @@
 
 Speech Repo 话术库是一款专注于提升沟通效率和实现话术统一管理的 Chrome 插件，广泛适用于运营、客服及商户等日常沟通场景。
 
-## 下载插件
 
+## 演示
+<p align="center">
+  <img
+    alt="logo"
+    src="./docs/video_demo.gif"
+    width="600"
+  />
+</p>
 
-## 视频演示
-
-
-## 🔧 快速使用
-1. 下载最新版本的 .crx 文件
-2. 打开 chrome://extensions/
-3. 开启"开发者模式"
-4. 拖拽 .crx 文件至页面完成安装
-5. 首次使用，在打开 Speech 时自带默认话术（可删除）
+## 🔧 手动安装
+1. 下载 [Speech Repo](https://github.com/justjavac/ReplaceGoogleCDN/archive/master.zip)
+   然后解压
+1. 打开 Chrome，输入: `chrome://extensions/`
+1. 勾选 开发者模式 (Developer Mode)
+1. 选择 加载未打包的扩展程序 (Load unpacked extension...) 然后选中刚才解压的文件夹目录，点击确定
+1. 注意⚠️：不要勾掉 开发者模式 (Developer Mode)，否则无法运行
+1. 安装演示:
+<p align="center">
+  <img
+    alt="logo"
+    src="./docs/demo2.gif"
+    width="600"
+  />
+</p>
 
 
 ## 🎯 项目背景
@@ -60,7 +73,7 @@ Speech Repo 话术库是一款专注于提升沟通效率和实现话术统一�
 4. 加载扩展:
    - 打开 Chrome 并导航到 `chrome://extensions/`
    - 开启"开发者模式"
-   - 点击"加载已解压的扩展程序"并选择 `dist` 文件夹
+   - 点击"加载已解压的扩展程序"并选择 `extension` 文件夹
 
 ## 赞助
 <img src="docs/wx_pay.png" width="240px">

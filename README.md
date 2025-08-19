@@ -6,17 +6,29 @@
 
 Speech Repo is a Chrome extension focused on improving response efficiency and standardizing message templates. It is widely applicable to daily online communication scenarios for operations, customer support, and merchants.
 
-## Download
+## Demo
+<p align="center">
+  <img
+    alt="logo"
+    src="./docs/video_demo.gif"
+    width="600"
+  />
+</p>
 
-## Video Demo
-
-
-## 🔧 Quick Start
-1. Download the latest .crx file
-2. Open chrome://extensions/ in Chrome
-3. Enable "Developer mode"
-4. Drag and drop the .crx file onto the page to install
-5. On first use, Speech comes with default templates (which can be deleted)
+## 🔧 Manual Installation
+1. Download Speech Repo and extract the archive
+2. Open Chrome and go to: chrome://extensions/
+3. Enable Developer mode
+4. Click Load unpacked and select the folder you just extracted, then click OK
+5. ⚠️ Important: Do not disable Developer mode, otherwise the extension will not work
+6. install demo:
+<p align="center">
+  <img
+    alt="logo"
+    src="./docs/demo2.gif"
+    width="600"
+  />
+</p>
 
 
 ## 🎯 Project Background
@@ -60,7 +72,7 @@ Speech Repo was developed to address these issues: it centralizes frequently use
 4. Load the extension:
    - Open Chrome and go to `chrome://extensions/`
    - Enable "Developer mode"
-   - Click "Load unpacked" and select the dist folder
+   - Click "Load unpacked" and select the `extensions` folder
 
 ## Sponsorship
 <img src="docs/wx_pay.png" width="240px">
@@ -69,7 +81,7 @@ Speech Repo was developed to address these issues: it centralizes frequently use
 The open-source version is under the AGPL-3.0 License and can be used for personal learning and use. For commercial purposes, please contact the author for authorization.
 
 ## Contact
-- Email
+- Email:
 yuanxiao5309@gmail.com
 
 - WeChat
