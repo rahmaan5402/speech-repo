@@ -15,6 +15,7 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: 'extension',
     rollupOptions: {
       // 👇 多入口打包
       input: {

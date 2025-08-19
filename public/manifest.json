@@ -1,8 +1,14 @@
 {
-  "name": "Speech",
-  "description": "Speech Extension",
+  "name": "Speech Repo",
+  "description": "Speech Repo Extension",
   "version": "1.0",
   "manifest_version": 3,
+  "icons": {
+    "16": "speech_62.png",
+    "32": "speech_62.png",
+    "48": "speech_62.png",
+    "128": "speech_62.png"
+  },
   "action": {
     "default_icon": "speech_62.png"
   },
