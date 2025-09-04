@@ -1,16 +1,19 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Mini from '../Mini';
-import { useState } from 'react';
-import Header from '../Header';
+import { useEffect, useState } from 'react';
+// import Header from '../Header';
 import { Toaster } from '@/components/ui/sonner';
 import { ChevronLast } from 'lucide-react';
 import { toggleSidebar } from '@/lib/utils';
 import Action from '../Action';
 
+// 创建一个全局变量来保存最后聚焦的输入元素
+let lastFocusedInput: HTMLInputElement | HTMLTextAreaElement | HTMLElement | null = null;
 
 function Home() {
     const [isOpenMini, setIsOpenMini] = useState(true);
     const [side, setSide] = useState<"left" | "right">("right");
+    const navigate = useNavigate();
 
     const handleSidebarClose = () => {
         setIsOpenMini(true);
@@ -18,11 +21,32 @@ function Home() {
         toggleSidebar(false);
     }
 
+    const handleSidebarOpen = () => {
+        setIsOpenMini(false);
+        navigate('/');
+    }
+
+    // 初始化时添加文本聚焦监听
+    useEffect(() => {
+        const handleFocusIn = (e: FocusEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement 
+                || (e.target instanceof HTMLElement && e.target.isContentEditable)) {
+                lastFocusedInput = e.target;
+            }
+        };
+        document.addEventListener("focusin", handleFocusIn);
+        
+        // 添加清理函数，移除事件监听器
+        return () => {
+            document.removeEventListener("focusin", handleFocusIn);
+        };
+    }, []);
+
     return (
         <>
             {
                 isOpenMini ? (
-                    <Mini miniChangeOpen={setIsOpenMini} setSide={setSide} side={side} />
+                    <Mini miniChangeOpen={handleSidebarOpen} setSide={setSide} side={side} />
                 ) : (
                     <div className={`fixed top-0 right-0 w-[410px] h-screen z-50`}>
                         <div className={`fixed top-0 right-0 w-[410px] h-screen z-50 flex`}>
@@ -39,11 +63,9 @@ function Home() {
 
                             {/* 侧边栏 - z-index 更高，覆盖按钮 */}
                             <div className={`relative flex flex-col w-full h-full bg-white/95 backdrop-blur-xl border-l border-white/20 z-50`}>
-                                <Header />
                                 <Outlet />
                                 <Toaster />
                             </div>
-
                             <Action />
                         </div>
                     </div >
@@ -52,5 +74,10 @@ function Home() {
         </>
     );
 }
+
+// 导出获取最后聚焦输入元素的方法，供其他组件使用
+export const getLastFocusedInput = (): HTMLInputElement | HTMLTextAreaElement | HTMLElement | null => {
+    return lastFocusedInput;
+};
 
 export default Home

@@ -127,5 +127,5 @@ html body[data-scroll-locked] {
 }
 
 .z-50 {
-    z-index: 99999 !important;
+    z-index: 999999 !important;
 }

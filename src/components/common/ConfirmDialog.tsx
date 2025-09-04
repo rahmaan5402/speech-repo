@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export function ConfirmDialog({
+  open,
+  onOpenChange,
   trigger,
   title,
   description,
@@ -19,12 +21,12 @@ export function ConfirmDialog({
   onConfirm,
 }: ConfirmDialogProps) {
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription dangerouslySetInnerHTML={{ __html: description }} />
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>

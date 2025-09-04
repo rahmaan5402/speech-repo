@@ -4,12 +4,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Controller, useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useScriptStore } from '@/store/scripts';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTagStore } from '@/store/tags';
 import { useCategoryStore } from '@/store/categories';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { useToastFeedback } from '@/hooks/useToastFeedback';
 
 
 const initScript: Script = {
@@ -20,13 +19,18 @@ const initScript: Script = {
 
 function Create() {
     const { t } = useTranslation();
-    const withToastFeedback = useToastFeedback();
     const navigate = useNavigate();
-    const { control, getValues, reset, trigger, formState: { errors } } = useForm({ defaultValues: initScript });
-    const { addScript, getScriptById, updateScript } = useScriptStore();
-    const { tags, loadTags } = useTagStore();
+    const { control, getValues, reset, trigger, setValue, formState: { errors } } = useForm({ defaultValues: initScript });
+    const {
+        addScript,
+        getScriptById,
+        updateScript
+    } = useScriptStore();
     const { categories, loadCategories } = useCategoryStore();
+    const { getTagsByCategory } = useTagStore();
     const location = useLocation();
+    // 首先在组件中添加状态来存储标签
+    const [availableTags, setAvailableTags] = useState<Tag[]>([]);
     let options: Option[] = [];
 
     useEffect(() => {
@@ -35,26 +39,17 @@ function Create() {
         if (id) {
             const fetchData = async () => {
                 const script = await getScriptById(Number(id));
-                console.log("script = ", script);
+                // 获取当前分类的标签 
                 if (script) {
+                    const tags = await getTagsByCategory(script?.category);
+                    setAvailableTags(tags);
                     reset(script);
                 }
             };
             fetchData();
         }
-        loadTags();
         loadCategories();
     }, []);
-
-    const showHomePage = () => {
-        navigate('/')
-    };
-
-    if (tags.length !== 0) {
-        tags.forEach(tag => {
-            options.push({ value: tag.name, label: tag.name });
-        });
-    }
 
     // 保存话术
     const saveScript = async () => {
@@ -77,17 +72,29 @@ function Create() {
             );
             return;
         }
-        const { id, ...values } = getValues() as Script;
+        const { id, ...value } = getValues() as Script;
         if (id) {
-            await withToastFeedback(() => updateScript({ ...values, id }));
+            await updateScript({ ...value, id });
         } else {
-            await withToastFeedback(() => addScript(values));
+            await addScript(value);
         }
-        showHomePage(); // 返回首页
+        navigate(`/?category=${value.category}`) // 返回首页
+    }
+
+    // 如果有可用标签，转换为 Option 格式
+    if (availableTags.length !== 0) {
+        options = availableTags.map(tag => ({ value: tag.name, label: tag.name }));
     }
 
     return (
         <>
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-5 shadow-lg">
+                <div className="flex justify-between items-center">
+                    <p className="text-lg font-semibold">{t('header.title')}</p>
+                    <div className='flex gap-2.5 items-center'>
+                    </div>
+                </div>
+            </div>
             {/* Content */}
             <div className="p-5 h-[520px] overflow-y-auto">
                 <div className="space-y-5">
@@ -117,7 +124,16 @@ function Create() {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     {t('form.speech.category')}
                                 </label>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select
+                                    onValueChange={async (value) => {
+                                        field.onChange(value);
+                                        const tags = await getTagsByCategory(value);
+                                        // 更新可用标签状态
+                                        setAvailableTags(tags);
+                                        // 清空已选择的标签
+                                        setValue('tags', []);
+                                    }}
+                                    value={field.value}>
                                     <SelectTrigger className="w-[100%]">
                                         <SelectValue placeholder={t('form.speech.category.placeholder')} />
                                     </SelectTrigger>
@@ -159,7 +175,7 @@ function Create() {
                     <div className="flex gap-3 pt-6">
                         <button
                             type="button"
-                            onClick={showHomePage}
+                            onClick={() => navigate(`/`)}
                             className="flex-1 bg-gray-100 text-gray-700 py-3 rounded text-sm font-medium transition-all hover:bg-gray-200"
                         >
                             {t('form.speech.action.cancel')}

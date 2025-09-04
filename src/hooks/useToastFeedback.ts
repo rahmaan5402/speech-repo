@@ -15,36 +15,28 @@ export function useToastFeedback() {
    * @param messages 可选的自定义消息
    */
   const executeWithToast = async (
-    submitFn: () => Promise<boolean>,
-    messages?: {
-      successTitle?: string
-      successDesc?: string
-      errorTitle?: string
-      errorDesc?: string
-    }
+    submitFn: () => Promise<void>,
+    callback?: () => void
   ) => {
-    const result = await submitFn();
-
-    if (result) {
-      toast(messages?.successTitle || t('action.toast.success'), {
-        description: messages?.successDesc,
+    try {
+      await submitFn();
+      toast(t('action.toast.success'), {
         action: {
           label: "OK",
           onClick: () => console.log("OK"),
         },
       });
-    } else {
-      toast(messages?.errorTitle || t('action.toast.failure'), {
-        description: messages?.errorDesc,
+    } catch(error) {
+      toast(t('action.toast.failure'), {
         action: {
           label: "OK",
           onClick: () => console.log("OK"),
         },
       });
+    } finally {
+      callback?.();
     }
-
-    return result;
-  };
+};
 
   return executeWithToast;
 }

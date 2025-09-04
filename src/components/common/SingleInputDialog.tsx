@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToastFeedback } from "@/hooks/useToastFeedback"
 import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -22,7 +21,6 @@ export default function SingleInputDialog({
   validate
 }: SingleInputDialogProps) {
   const { t } = useTranslation();
-  const withToastFeedback = useToastFeedback();
   const [value, setValue] = useState(defaultValue)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,7 +45,7 @@ export default function SingleInputDialog({
 
   const handleSave = async () => {
     setLoading(true)
-    await withToastFeedback(() => onSubmit(value))
+    await onSubmit(value)
     onOpenChange(false)
     setLoading(false)
   }

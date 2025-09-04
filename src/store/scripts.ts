@@ -3,20 +3,19 @@ import {
     deleteScriptById,
     deleteScriptsByCategory,
     getScriptById,
+    getScriptsByCategoryAndTags,
     getScriptsByPage,
     getTotalScriptCount,
     updateScript
 } from '@/service/scripts';
 import { create } from 'zustand';
 import { useCategoryStore } from './categories';
-import { DEFAULT_ALL, pageSize } from '@/utils/constants';
 
-
-export const useScriptStore = create<ScriptState>((set, get) => ({
+export const useScriptStore = create<ScriptState>((set) => ({
     scripts: [],
     total: 0,
     exportScripts: [],
-    currentFilter: DEFAULT_ALL, // 默认值
+    currentFilter: '', // 默认值
     setCurrentFilter: (filter) => set({ currentFilter: filter }),
     // 分页加载脚本
     loadScripts: async (page, size, category) => {
@@ -29,29 +28,26 @@ export const useScriptStore = create<ScriptState>((set, get) => ({
     },
 
     // 查询所有
-    getExportScripts: async (category) => {
-        const list = await getScriptsByPage(category, 1, 9999999);
-        console.log('getScripts', list);
+    getExportScripts: async (category, tags) => {
+        const { data: list } = await getScriptsByCategoryAndTags(category, tags, 1, 9999999);
+        console.log('getExportScripts getScripts', list);
         set({ exportScripts: list });
     },
 
     // 添加脚本（并重新加载分页数据）
-    addScript: async (script) => {
+    addScript: async (script): Promise<void> => {
+        // 创建话术
         await addScript(script);
-        return true;
     },
 
     // 删除后刷新当前页数据
-    deleteScript: async (id, page, size, category) => {
+    deleteScript: async (id) => {
         await deleteScriptById(id);
-        await get().loadScripts(page, size, category);
-        return true;
     },
 
     // 更新脚本并刷新当前页
     updateScript: async (script) => {
         await updateScript(script);
-        return true;
     },
 
     getScriptById: async (id) => {
@@ -60,7 +56,12 @@ export const useScriptStore = create<ScriptState>((set, get) => ({
 
     deleteCategory: async (category) => {
         await deleteScriptsByCategory(category);
-        await get().loadScripts(1, pageSize, DEFAULT_ALL);
-        return await useCategoryStore.getState().deleteCategory(category);
-    }
+        await useCategoryStore.getState().loadCategories();
+    },
+
+    // 添加支持标签过滤的脚本加载方法
+    loadScriptsByCategoryAndTags: async (page, size, category, tags) => {
+        const { data: list, total: count } = await getScriptsByCategoryAndTags(category, tags, page, size);
+        set({ scripts: list, total: count });
+    },
 }));

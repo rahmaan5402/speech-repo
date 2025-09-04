@@ -35,7 +35,6 @@ function DropdownMenuContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
-  console.log("DropdownMenuContent shadowPortalContainer = ", shadowPortalContainer);
   return (
     <DropdownMenuPrimitive.Portal container={shadowPortalContainer}>
       <DropdownMenuPrimitive.Content

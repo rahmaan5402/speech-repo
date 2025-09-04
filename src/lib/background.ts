@@ -1,143 +1,145 @@
-import { defaultCategories, defaultScripts, defaultTags } from "@/utils/constants";
-import Dexie, { Table } from "dexie";
+import { Result } from "@/lib/utils";
+import { db } from "@/lib/db";
 
-export class SpeechDB extends Dexie {
-    static readonly databaseName = 'speech_db';
-    scripts!: Table<Script, number>;
-    tags!: Table<Tag, number>;      // 添加 tags 表
-    categories!: Table<Category, number>;  // 添加 categories 表
+// 消息处理器映射
+const messageHandlers: Record<string, MessageHandler> = {};
 
-    constructor() {
-        super(SpeechDB.databaseName);
-        this.version(1).stores({
-            // 主键 id，自增
-            scripts: '++id, category, tags',
-            tags: '++id, &name',        // tags 表定义
-            categories: '++id, &name, sorted'   // categories 表定义
-        });
+// 查询全部类型
+messageHandlers['getAllCategories'] = async () => {
+  const data = await db.categories.orderBy('sorted').toArray();
+  return Result.success(data);
+};
 
-        // ✅ 首次创建数据库时触发
-        this.on('populate', async () => {
-            console.log('init database table...');
-            await this.scripts.bulkAdd(defaultScripts);
-            await this.tags.bulkAdd(defaultTags);
-            await this.categories.bulkAdd(defaultCategories);
-            console.log('init database table success...');
-        });
+// 添加类型
+messageHandlers['addCategory'] = async (data) => {
+  const exists = await db.categories.where('name').equals(data.name).first();
+  if (exists) {
+    return Result.error('分类已存在');
+  }
+  const last = await db.categories.orderBy('sorted').last();
+  const nextSort = last ? last.sorted + 1 : 1;
+  await db.categories.add({ name: data.name, sorted: nextSort });
+  return Result.success();
+};
+
+// 根据名称删除类型
+messageHandlers['deleteCategoryByName'] = async (data) => {
+  await db.categories.where('name').equals(data.name).delete();
+  return Result.success();
+};
+
+// 添加话术
+messageHandlers['addScript'] = async (data) => {
+  await db.scripts.add(data);
+  return Result.success();
+};
+
+messageHandlers['deleteScriptById'] = async (data) => {
+  await db.scripts.delete(data);
+  return Result.success();
+};
+
+messageHandlers['updateScript'] = async (data) => {
+  await db.scripts.put(data);
+  return Result.success();
+};
+
+messageHandlers['getScriptById'] = async (data) => {
+  const script = await db.scripts.get(data);
+  return Result.success(script);
+};
+
+messageHandlers['deleteScriptsByCategory'] = async (data) => {
+  try {
+    await db.transaction('rw', db.tags, db.categories, db.scripts, async () => {
+      // 1. 删除该分类的标签
+      await db.tags.where({ category: data }).delete();
+      // 2. 删除该分类的脚本
+      await db.scripts.where('category').equals(data).delete();
+      // 3. 删除该分类
+      await db.categories.where('name').equals(data).delete();
+    });
+    return Result.success();
+  } catch (error) {
+    return Result.error(error);
+  }
+};
+
+messageHandlers['getAllTags'] = async () => {
+  const data = await db.tags.toArray();
+  return Result.success(data);
+};
+
+messageHandlers['addTag'] = async (data) => {
+  const tagExists = await db.tags.where({ category: data.category, name: data.tagName }).first();
+  if (tagExists) {
+    return Result.error('标签已存在');
+  }
+  await db.tags.add({ name: data.tagName, category: data.category });
+  return Result.success(data);
+};
+
+messageHandlers['deleteTagById'] = async (data) => {
+  await db.tags.delete(data);
+  return Result.success();
+};
+
+messageHandlers['getScriptsByCategoryAndTags'] = async (data) => {
+  const { category: filterCategory, tags: filterTags, page: filterPage, pageSize: filterPageSize } = data;
+  const filterOffset = (filterPage - 1) * filterPageSize;
+  let query = db.scripts.where('category').equals(filterCategory);
+  // 应用标签过滤
+  if (filterTags && filterTags.length > 0) {
+    query = query.filter(script =>
+      filterTags.some(tag => script.tags.includes(tag))
+    );
+  }
+  const result = await query.offset(filterOffset).limit(filterPageSize).toArray();
+  const total = await query.count();
+  return Result.success({data: result, total: total});
+};
+
+messageHandlers['deleteTagByCategoryAndName'] = async (data) => {
+  await db.transaction('rw', db.tags, db.scripts, async () => {
+    // 1. 删除该分类的标签
+    await db.tags.where({ category: data.category, name: data.name }).delete();
+    // 找到所有包含这个 tag 的脚本
+    const scriptsWithTag = await db.scripts
+      .filter(script => script.tags.includes(data.name))
+      .toArray();
+
+    // 更新 scripts
+    for (const script of scriptsWithTag) {
+      const updatedTags = script.tags.filter(tag => tag !== data.name);
+      await db.scripts.update(script.id!, { tags: updatedTags });
     }
-}
+  });
+  return Result.success();
+};
 
-export const db = new SpeechDB();
-
-console.log("background.js chrome.runtime = ", chrome.runtime);
+messageHandlers['getTagsByCategory'] = async (data) => {
+  const tagsByCategory = await db.tags.where('category').equals(data).toArray();
+  return Result.success(tagsByCategory);
+};
 
 // 监听来自内容脚本的消息
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   // 确保异步操作完成后再发送响应
   (async () => {
+    const { action, data } = message;
     try {
-      const { action, data } = message;
-
-      console.log("background.js onMessage addListener = ", action, data);
-
-      // 根据不同的操作类型处理请求
-      switch (action) {
-        // 分类相关操作
-        case 'getAllCategories':
-          sendResponse({ success: true, data: await db.categories.orderBy('sorted').toArray() });
-          break;
-        case 'addCategory':
-          const exists = await db.categories.where('name').equalsIgnoreCase(data.name).first();
-          if (exists) {
-            sendResponse({ success: false, error: '分类已存在' });
-          } else {
-            const last = await db.categories.orderBy('sorted').last();
-            const nextSort = last ? last.sorted + 1 : 1;
-            const id = await db.categories.add({ name: data.name, sorted: nextSort });
-            sendResponse({ success: true, data: id });
-          }
-          break;
-        case 'deleteCategoryByName':
-          await db.categories.where('name').equals(data.name).delete();
-          sendResponse({ success: true });
-          break;
-
-        // 脚本相关操作
-        case 'getScriptsByPage':
-          const offset = (data.page - 1) * data.pageSize;
-          let scripts = [];
-          if (data.category === 'all') {
-            scripts = await db.scripts.offset(offset).limit(data.pageSize).toArray();
-          } else {
-            scripts = await db.scripts
-              .where('category')
-              .equals(data.category)
-              .offset(offset)
-              .limit(data.pageSize)
-              .toArray();
-          }
-          console.log('getScriptsByPage = ', scripts);
-          sendResponse({ success: true, data: scripts });
-          break;
-        case 'getTotalScriptCount':
-          let count;
-          if (data === 'all') {
-            count = await db.scripts.count();
-          } else {
-            count = await db.scripts.where('category').equals(data).count();
-          }
-          console.log('getTotalScriptCount = ', count);
-          sendResponse({ success: true, data: count });
-          break;
-        case 'addScript':
-          const scriptId = await db.scripts.add(data);
-          sendResponse({ success: true, data: scriptId });
-          break;
-        case 'deleteScriptById':
-          await db.scripts.delete(data);
-          sendResponse({ success: true });
-          break;
-        case 'updateScript':
-          await db.scripts.put(data);
-          sendResponse({ success: true });
-          break;
-        case 'getScriptById':
-          const script = await db.scripts.get(data);
-          sendResponse({ success: true, data: script });
-          break;
-        case 'deleteScriptsByCategory':
-          await db.scripts.where('category').equals(data).delete();
-          sendResponse({ success: true });
-          break;
-
-        // 标签相关操作
-        case 'getAllTags':
-          sendResponse({ success: true, data: await db.tags.toArray() });
-          break;
-        case 'addTag':
-          const tagExists = await db.tags.where('name').equals(data).first();
-          if (tagExists) {
-            sendResponse({ success: false, error: '标签已存在' });
-          } else {
-            const tagId = await db.tags.add({ name: data });
-            sendResponse({ success: true, data: tagId });
-          }
-          break;
-        case 'deleteTagById':
-          await db.tags.delete(data);
-          sendResponse({ success: true });
-          break;
-
-        default:
-          sendResponse({ success: false, error: '未知操作' });
+      // 检查是否存在对应的处理器
+      if (messageHandlers[action]) {
+        // 调用对应的处理函数并获取结果
+        const result = await messageHandlers[action](data);
+        sendResponse(result);
+      } else {
+        sendResponse(Result.error('未知操作'));
       }
     } catch (error) {
-      console.log("background.js error = ", error);
-      sendResponse({ success: false, error: error.message });
+      console.error('service error:', error, action, data);
+      sendResponse(Result.error(error.message));
     }
   })();
-
-  // 保持消息通道开放，直到异步操作完成
   return true;
 });
-// ... existing code ...

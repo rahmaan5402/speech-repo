@@ -10,7 +10,8 @@
     "128": "speech_62.png"
   },
   "action": {
-    "default_icon": "speech_62.png"
+    "default_icon": "speech_62.png",
+    "default_popup": "index.html"
   },
   "background": {
     "service_worker": "background.js",

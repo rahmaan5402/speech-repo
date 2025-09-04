@@ -1,8 +1,11 @@
 import { create } from 'zustand';
-import { addTag, deleteTagById, getAllTags } from '@/service/tags';
+import { addTag, deleteTagById, deleteTagByName, getAllTags, getTagsByCategory } from '@/service/tags';
 
 export const useTagStore = create<TagState>((set, get) => ({
   tags: [],
+  selectedTags: [],
+  allTagsByCategory: [],
+  setSelectedTags: (tags) => set({ selectedTags: tags }),
 
   // 加载全部 tag
   loadTags: async () => {
@@ -11,13 +14,9 @@ export const useTagStore = create<TagState>((set, get) => ({
   },
 
   // 添加 tag（名称唯一）
-  addTag: async (name) => {
-    const result = await addTag(name);
-    if (result !== null) {
-      await get().loadTags();
-      return true;
-    }
-    return false;
+  addTag: async (category: string, tagName: string) => {
+    await addTag(category, tagName);
+    await get().getTagsByCategory(category);
   },
 
   // 删除 tag（并刷新）
@@ -25,4 +24,19 @@ export const useTagStore = create<TagState>((set, get) => ({
     await deleteTagById(id);
     await get().loadTags();
   },
+
+  // 删除 tag（并刷新）
+  deleteTagByName: async (name: string) => {
+    await deleteTagByName(name);
+    await get().loadTags();
+    return true;
+  },
+
+  // 添加根据分类聚合标签的方法
+  getTagsByCategory: async (category) => {
+    const tags = await getTagsByCategory(category);
+    set({ allTagsByCategory: tags });
+    return tags;
+  },
+
 }));

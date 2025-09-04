@@ -65,7 +65,6 @@ if (chrome?.runtime) {
     const shadowRoot = container?.shadowRoot;
     const root = shadowRoot?.getElementById('speech-extension-root');
     if (open) {
-      console.log('speechToggleSidebar open!')
       document.body.style.marginRight = '410px'; // 或 paddingRight，根据你布局需要
       document.body.style.transition = 'margin 0.3s ease';
 
@@ -75,12 +74,11 @@ if (chrome?.runtime) {
         root.style.right = '0';
         root.style.width = '410px';
         root.style.height = '100vh';
-        root.style.zIndex = '9999';
+        root.style.zIndex = '999999';
         root.style.backgroundColor = 'white'; // 可选：默认背景
         root.style.boxShadow = '-2px 0 8px rgba(0,0,0,0.1)';
       }
     } else {
-      console.log('speechToggleSidebar close!')
       document.body.style.marginRight = '0px';
       if (root) {
         root.removeAttribute('style');
@@ -91,12 +89,12 @@ if (chrome?.runtime) {
   console.warn('Not running in Chrome extension environment. This app requires Chrome extension to work properly.');
 }
 
-window.addEventListener('db_message', (event) => {
+window.addEventListener('db_request', (event) => {
   const { requestId, action, data } = event.detail;
 
   if (!chrome?.runtime) {
     const responseEvent = new CustomEvent('db_response', {
-      detail: { responseId: requestId, error: 'Not in Chrome extension environment' }
+      detail: { responseId: requestId, responseData: Result.error('Not in Chrome extension environment') }
     });
     window.dispatchEvent(responseEvent);
     return;
@@ -104,7 +102,7 @@ window.addEventListener('db_message', (event) => {
 
   chrome.runtime.sendMessage({ action, data }, (response) => {
     const responseEvent = new CustomEvent('db_response', {
-      detail: { responseId: requestId, responseData: response?.data, error: response?.error }
+      detail: { responseId: requestId, responseData: response }
     });
     window.dispatchEvent(responseEvent);
   });

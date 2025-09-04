@@ -15,17 +15,12 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     },
 
     addCategory: async (name) => {
-        const result = await addCategory(name);
-        if (result !== null) {
-            await get().loadCategories();
-            return true;
-        }
-        return false;
+        await addCategory(name);
+        await get().loadCategories();
     },
 
     deleteCategory: async (name) => {
         await deleteCategoryByName(name);
         await get().loadCategories();
-        return true;
     }
 }));
